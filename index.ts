@@ -4,17 +4,17 @@ import multer from 'multer'
 import path from 'path'
 import sharp from 'sharp'
 
-export type TransformerType = {
+export type TransformType = {
   id: string
   sharp: sharp.Sharp
-  filename?: (req: Request, file: Express.Multer.File, transformer: TransformerType) => string
-  meta?: (req: Request, file: Express.Multer.File, transformer: TransformerType) => ItemBucketMetadata
+  filename?: (req: Request, file: Express.Multer.File, transform: TransformType) => string
+  meta?: (req: Request, file: Express.Multer.File, transform: TransformType) => ItemBucketMetadata
 }
 
-export type FilenameCallbackType = (req: Request, file: Express.Multer.File, transformer: TransformerType) => string
-export type ObjectMetaCallbackType = (req: Request, file: Express.Multer.File, transformer: TransformerType) => ItemBucketMetadata
+export type FilenameCallbackType = (req: Request, file: Express.Multer.File, transform: TransformType) => string
+export type ObjectMetaCallbackType = (req: Request, file: Express.Multer.File, transform: TransformType) => ItemBucketMetadata
 export type TransformedType = Partial<Express.Multer.File> & { id: string, status: 'success' | 'error', meta?: any }
-export type HandleFileCallbackInfoType = Partial<Express.Multer.File> & { transformed: TransformedType[] }
+export type HandleFileCallbackInfoType = Partial<Express.Multer.File> & { transforms: TransformedType[] }
 export type HandleFileCallbackType = (error?: any, info?: HandleFileCallbackInfoType) => void
 
 export type MulterSharpMinioStorageOptions = {
@@ -22,7 +22,7 @@ export type MulterSharpMinioStorageOptions = {
   meta?: ObjectMetaCallbackType
   bucket: string
   clientOptions: ClientOptions
-  transformers: TransformerType[]
+  transforms: TransformType[]
 }
 
 const defaultFilenameCallback: FilenameCallbackType = (_req, file) => {
@@ -30,21 +30,21 @@ const defaultFilenameCallback: FilenameCallbackType = (_req, file) => {
   return `${Date.now()}${fileExt}`
 }
 
-const defaultObjectMetaCallback: ObjectMetaCallbackType = (_req, _file, _transformer) => ({})
+const defaultObjectMetaCallback: ObjectMetaCallbackType = (_req, _file, _transform) => ({})
 
 class MulterSharpMinioStorage implements multer.StorageEngine {
   private filename?: FilenameCallbackType
   private meta?: ObjectMetaCallbackType
   private bucket: string
   private minioClient: Client
-  private transformers: TransformerType[]
+  private transforms: TransformType[]
   private minioClientOptions: ClientOptions
 
   constructor(opts: MulterSharpMinioStorageOptions) {
     this.filename = opts.filename
     this.meta = opts.meta
     this.bucket = opts.bucket
-    this.transformers = opts.transformers
+    this.transforms = opts.transforms
     this.minioClient = new Client(opts.clientOptions)
     this.minioClientOptions = opts.clientOptions
   }
@@ -58,22 +58,22 @@ class MulterSharpMinioStorage implements multer.StorageEngine {
     async function transformation() {
       const untransformed = file.stream
       const res: TransformedType[] = await Promise.all(
-        t.transformers.map(async transformer => {
-          const filenameFn = transformer.filename || t.filename || defaultFilenameCallback
-          const filename = filenameFn(req, file, transformer)
+        t.transforms.map(async transform => {
+          const filenameFn = transform.filename || t.filename || defaultFilenameCallback
+          const filename = filenameFn(req, file, transform)
           const media = sharp()
           const transformed = sharp()
-          untransformed.pipe(media).pipe(transformer.sharp).pipe(transformed)
+          untransformed.pipe(media).pipe(transform.sharp).pipe(transformed)
           const transformedMetadata = await transformed.metadata()
-          const objectMetaFn = transformer.meta || t.meta || defaultObjectMetaCallback
-          const objectMeta = objectMetaFn(req, file, transformer)
+          const objectMetaFn = transform.meta || t.meta || defaultObjectMetaCallback
+          const objectMeta = objectMetaFn(req, file, transform)
           return await t.minioClient
             .putObject(t.bucket, filename, transformed, objectMeta)
             .then(objectInfo => {
               const co = t.minioClientOptions
               const destination = `${co.useSSL ? 'https' : 'http'}://${co.endPoint}/${t.bucket}/${filename}`
               const res: TransformedType = {
-                id: transformer.id,
+                id: transform.id,
                 status: 'success',
                 filename,
                 destination,
@@ -85,7 +85,7 @@ class MulterSharpMinioStorage implements multer.StorageEngine {
             // eslint-disable-next-line n/handle-callback-err
             .catch(err => {
               const res: TransformedType = {
-                id: transformer.id,
+                id: transform.id,
                 status: 'error'
               }
               return res
@@ -96,7 +96,7 @@ class MulterSharpMinioStorage implements multer.StorageEngine {
     }
 
     transformation().then(res => {
-      callback(null, { transformed: res })
+      callback(null, { transforms: res })
     })
   }
 
