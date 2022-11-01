@@ -6,7 +6,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest --coverage",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc",
+    "publish": "npm publish"
   },
   "keywords": [
     "multer",

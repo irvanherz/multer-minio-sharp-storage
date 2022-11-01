@@ -5,17 +5,21 @@ Streaming multer storage engine with [Sharp](https://github.com/lovell/sharp) im
 ## Installation
 
 ```bash
-npm install multer-sharp-minio-storage@latest
+npm install multer-sharp-minio-storage
 ```
 
 ## Usage
 
 ```ts
+import dotenv from 'dotenv'
+import express, { Request, Response } from 'express'
 import multer from 'multer'
+import MulterSharpMinioStorage from 'multer-sharp-minio-storage'
 import path from 'path'
 import sharp from 'sharp'
 import slugify from 'slugify'
-import MulterSharpMinioStorage from 'multer-sharp-minio-storage'
+
+dotenv.config()
 
 const upload = multer({
   storage: new MulterSharpMinioStorage({
@@ -25,7 +29,7 @@ const upload = multer({
     },
     meta: (_req, _file, _t) => ({ 'Content-Type': 'image/jpeg' }),
     bucket: process.env.S3_BUCKET,
-    transformers: [
+    transforms: [
       {
         id: '320',
         sharp: sharp().resize(320).jpeg()
@@ -43,5 +47,85 @@ const upload = multer({
   })
 })
 
-export const uploadImage = upload.single('file')
+const app = express()
+app.post(
+  '/upload-image',
+  upload.single('file'),
+  (req: Request, res: Response) => {
+    try {
+      return res.status(200).json(req.file)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).send('Error')
+    }
+  }
+)
+
+app.listen(+process.env.PORT, process.env.HOST, () => {
+  console.log(`Listening on ${process.env.HOST}:${process.env.PORT}`)
+})
+
+```
+
+### Output Example (req.file)
+
+```json
+{
+  "fieldname": "file",
+  "originalname": "Screenshot from 2022-06-21 14-09-24.jpg",
+  "encoding": "7bit",
+  "mimetype": "image/jpeg",
+  "transforms": [
+    {
+      "id": "320",
+      "status": "success",
+      "filename": "screenshot-from-2022-06-21-14-09-24_1667271069830_320.jpg",
+      "destination": "https://is3.cloudhost.id/liburanaja/screenshot-from-2022-06-21-14-09-24_1667271069830_320.jpg",
+      "fieldname": "file",
+      "meta": {
+        "format": "jpeg",
+        "size": 6837,
+        "width": 320,
+        "height": 240,
+        "space": "srgb",
+        "channels": 3,
+        "depth": "uchar",
+        "density": 72,
+        "chromaSubsampling": "4:2:0",
+        "isProgressive": false,
+        "hasProfile": false,
+        "hasAlpha": false,
+        "objectInfo": {
+          "etag": "c925ddf7dc870a5b14c876add99514fc",
+          "versionId": null
+        }
+      }
+    },
+    {
+      "id": "640",
+      "status": "success",
+      "filename": "screenshot-from-2022-06-21-14-09-24_1667271069831_640.jpg",
+      "destination": "https://is3.cloudhost.id/liburanaja/screenshot-from-2022-06-21-14-09-24_1667271069831_640.jpg",
+      "fieldname": "file",
+      "meta": {
+        "format": "jpeg",
+        "size": 20497,
+        "width": 640,
+        "height": 480,
+        "space": "srgb",
+        "channels": 3,
+        "depth": "uchar",
+        "density": 72,
+        "chromaSubsampling": "4:2:0",
+        "isProgressive": false,
+        "hasProfile": false,
+        "hasAlpha": false,
+        "objectInfo": {
+          "etag": "479c49703f98f628d8a3a2a570386247",
+          "versionId": null
+        }
+      }
+    }
+  ]
+}
 ```
