@@ -1,6 +1,6 @@
 {
-  "name": "multer-sharp-minio-storage",
-  "version": "0.0.2",
+  "name": "multer-minio-sharp-storage",
+  "version": "1.0.0",
   "description": "Streaming multer storage engine with Sharp image transformer for MinIO.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,9 +20,9 @@
   ],
   "author": "Muhammad Irvan Hermawan",
   "bugs": {
-    "url": "https://github.com/irvanherz/multer-sharp-minio-storage/issues"
+    "url": "https://github.com/irvanherz/multer-minio-sharp-storage/issues"
   },
-  "homepage": "https://github.com/irvanherz/multer-sharp-minio-storage#readme",
+  "homepage": "https://github.com/irvanherz/multer-minio-sharp-storage#readme",
   "license": "MIT",
   "devDependencies": {
     "@types/express": "^4.17.14",

@@ -17,7 +17,7 @@ export type TransformedType = Partial<Express.Multer.File> & { id: string, statu
 export type HandleFileCallbackInfoType = Partial<Express.Multer.File> & { transforms: TransformedType[] }
 export type HandleFileCallbackType = (error?: any, info?: HandleFileCallbackInfoType) => void
 
-export type MulterSharpMinioStorageOptions = {
+export type MulterMinioSharpStorageOptions = {
   filename?: FilenameCallbackType
   meta?: ObjectMetaCallbackType
   bucket: string
@@ -32,7 +32,7 @@ const defaultFilenameCallback: FilenameCallbackType = (_req, file) => {
 
 const defaultObjectMetaCallback: ObjectMetaCallbackType = (_req, _file, _transform) => ({})
 
-class MulterSharpMinioStorage implements multer.StorageEngine {
+class MulterMinioSharpStorage implements multer.StorageEngine {
   private filename?: FilenameCallbackType
   private meta?: ObjectMetaCallbackType
   private bucket: string
@@ -40,7 +40,7 @@ class MulterSharpMinioStorage implements multer.StorageEngine {
   private transforms: TransformType[]
   private minioClientOptions: ClientOptions
 
-  constructor(opts: MulterSharpMinioStorageOptions) {
+  constructor(opts: MulterMinioSharpStorageOptions) {
     this.filename = opts.filename
     this.meta = opts.meta
     this.bucket = opts.bucket
@@ -107,4 +107,4 @@ class MulterSharpMinioStorage implements multer.StorageEngine {
   }
 }
 
-export default MulterSharpMinioStorage
+export default MulterMinioSharpStorage

@@ -1,11 +1,11 @@
-# [multer-sharp-minio-storage](https://github.com/irvanherz/multer-sharp-minio-storage)
+# [multer-minio-sharp-storage](https://github.com/irvanherz/multer-minio-sharp-storage)
 
 Streaming multer storage engine with [Sharp](https://github.com/lovell/sharp) image transformer for [MinIO](https://github.com/minio/minio-js).
 
 ## Installation
 
 ```bash
-npm install multer-sharp-minio-storage
+npm install multer-minio-sharp-storage
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ npm install multer-sharp-minio-storage
 import dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
 import multer from 'multer'
-import MulterSharpMinioStorage from 'multer-sharp-minio-storage'
+import MulterMinioSharpStorage from 'multer-minio-sharp-storage'
 import path from 'path'
 import sharp from 'sharp'
 import slugify from 'slugify'
@@ -22,7 +22,7 @@ import slugify from 'slugify'
 dotenv.config()
 
 const upload = multer({
-  storage: new MulterSharpMinioStorage({
+  storage: new MulterMinioSharpStorage({
     filename: (_req, file, t) => {
       const name = path.parse(file.originalname).name
       return slugify(name, { lower: true, trim: true }) + '_' + Date.now() + '_' + t.id + '.jpg'
