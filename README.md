@@ -23,11 +23,11 @@ dotenv.config()
 
 const upload = multer({
   storage: new MulterMinioSharpStorage({
-    filename: (_req, file, t) => {
+    key: (_req, file, t) => {
       const name = path.parse(file.originalname).name
       return slugify(name, { lower: true, trim: true }) + '_' + Date.now() + '_' + t.id + '.jpg'
     },
-    meta: (_req, _file, _t) => ({ 'Content-Type': 'image/jpeg' }),
+    objectMeta: (_req, _file, _t) => ({ 'Content-Type': 'image/jpeg' }),
     bucket: process.env.S3_BUCKET,
     transforms: [
       {
@@ -46,6 +46,8 @@ const upload = multer({
     }
   })
 })
+
+export const uploadImage = upload.single('file')
 
 const app = express()
 app.post(
@@ -70,62 +72,58 @@ app.listen(+process.env.PORT, process.env.HOST, () => {
 ### Output Example (req.file)
 
 ```json
-{
-  "fieldname": "file",
-  "originalname": "Screenshot from 2022-06-21 14-09-24.jpg",
+ {
   "encoding": "7bit",
-  "mimetype": "image/jpeg",
+  "mimetype": "image/png",
+  "fieldname": "file",
   "transforms": [
     {
       "id": "320",
-      "status": "success",
-      "filename": "screenshot-from-2022-06-21-14-09-24_1667271069830_320.jpg",
-      "destination": "https://is3.cloudhost.id/liburanaja/screenshot-from-2022-06-21-14-09-24_1667271069830_320.jpg",
-      "fieldname": "file",
       "meta": {
-        "format": "jpeg",
-        "size": 6837,
-        "width": 320,
-        "height": 240,
-        "space": "srgb",
-        "channels": 3,
+        "size": 8634,
         "depth": "uchar",
+        "space": "srgb",
+        "width": 320,
+        "format": "jpeg",
+        "height": 156,
         "density": 72,
-        "chromaSubsampling": "4:2:0",
-        "isProgressive": false,
-        "hasProfile": false,
+        "channels": 3,
         "hasAlpha": false,
-        "objectInfo": {
-          "etag": "c925ddf7dc870a5b14c876add99514fc",
-          "versionId": null
-        }
-      }
+        "hasProfile": false,
+        "isProgressive": false,
+        "chromaSubsampling": "4:2:0"
+      },
+      "object": {
+        "key": "screenshot-from-2022-06-21-17-17-30_1667311930415_320.jpg",
+        "etag": "be001de1bed495bcfd9aa3c2841d3e18",
+        "versionId": null
+      },
+      "status": "success"
     },
     {
       "id": "640",
-      "status": "success",
-      "filename": "screenshot-from-2022-06-21-14-09-24_1667271069831_640.jpg",
-      "destination": "https://is3.cloudhost.id/liburanaja/screenshot-from-2022-06-21-14-09-24_1667271069831_640.jpg",
-      "fieldname": "file",
       "meta": {
-        "format": "jpeg",
-        "size": 20497,
-        "width": 640,
-        "height": 480,
-        "space": "srgb",
-        "channels": 3,
+        "size": 30003,
         "depth": "uchar",
+        "space": "srgb",
+        "width": 640,
+        "format": "jpeg",
+        "height": 311,
         "density": 72,
-        "chromaSubsampling": "4:2:0",
-        "isProgressive": false,
-        "hasProfile": false,
+        "channels": 3,
         "hasAlpha": false,
-        "objectInfo": {
-          "etag": "479c49703f98f628d8a3a2a570386247",
-          "versionId": null
-        }
-      }
+        "hasProfile": false,
+        "isProgressive": false,
+        "chromaSubsampling": "4:2:0"
+      },
+      "object": {
+        "key": "screenshot-from-2022-06-21-17-17-30_1667311930416_640.jpg",
+        "etag": "9a7acfbe757d920d2258bd33af83f912",
+        "versionId": null
+      },
+      "status": "success"
     }
-  ]
+  ],
+  "originalname": "Screenshot from 2022-06-21 17-17-30.png"
 }
 ```
