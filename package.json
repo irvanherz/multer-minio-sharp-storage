@@ -1,6 +1,6 @@
 {
   "name": "multer-minio-sharp-storage",
-  "version": "0.0.2",
+  "version": "1.0.1",
   "description": "Streaming multer storage engine with Sharp image transformer for MinIO.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
