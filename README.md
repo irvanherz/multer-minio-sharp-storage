@@ -10,6 +10,24 @@ npm install multer-minio-sharp-storage
 
 ## Usage
 
+### Storage Initialization
+
+```ts
+new MulterMinioSharpStorage(opts: MulterMinioSharpStorageOptions): MulterMinioSharpStorage
+```
+#### Options
+| Name | Description | Type | Default |
+| --- | --- | --- | --- |
+| **key** | Object key generator callback | `KeyCallbackType` | `defaultKeyCallback` |
+| **objectMeta** | Object metadata generator callback | `ObjectMetaCallbackType` | `defaultObjectMetaCallback` |
+| **withSharpMeta** | Whether to include transformed image metadata | `boolean` | `true` |
+| **bucket** | Storage bucket name | `string` | - |
+| **clientOptions** | Minio storage options | `Minio.ClientOptions` | - |
+| **transforms** | Array of transformation options. See example below | `TransformType[]` | - |
+| **generator** | Multer file object (req.file) custom generator | `GeneratorCallbackType` | `defaultGeneratorCallback` |
+
+### Example
+
 ```ts
 import dotenv from 'dotenv'
 import express, { Request, Response } from 'express'
@@ -69,7 +87,7 @@ app.listen(+process.env.PORT, process.env.HOST, () => {
 
 ```
 
-### Output Example (req.file)
+#### Output (req.file)
 
 ```json
  {
