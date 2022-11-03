@@ -65,8 +65,6 @@ const upload = multer({
   })
 })
 
-export const uploadImage = upload.single('file')
-
 const app = express()
 app.post(
   '/upload-image',
