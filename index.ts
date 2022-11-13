@@ -88,7 +88,7 @@ class MulterMinioSharpStorage implements multer.StorageEngine {
           const transformed = sharp()
           let transformedMetadata: sharp.Metadata
           if (t.withSharpMeta) {
-            untransformed.pipe(media).pipe(transform.sharp).pipe(transformed)
+            untransformed.pipe(media).pipe(transform.sharp.clone()).pipe(transformed)
             transformedMetadata = await transformed.metadata()
           }
           const objectMetaFn = transform.objectMeta || t.objectMeta || defaultObjectMetaCallback
