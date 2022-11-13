@@ -7,7 +7,7 @@ import sharp from 'sharp'
 
 export type TransformType = {
   id: string
-  sharp: sharp.Sharp
+  sharp: (req: Request, file: Express.Multer.File, transform: TransformType) => sharp.Sharp
   key?: (req: Request, file: Express.Multer.File, transform: TransformType) => string
   objectMeta?: (req: Request, file: Express.Multer.File, transform: TransformType) => ItemBucketMetadata
 }
@@ -84,11 +84,9 @@ class MulterMinioSharpStorage implements multer.StorageEngine {
         t.transforms.map(async transform => {
           const keyFn = transform.key || t.key || defaultKeyCallback
           const key = keyFn(req, file, transform)
-          const media = sharp()
-          const transformed = sharp()
+          const transformed = untransformed.pipe(transform.sharp(req, file, transform)).pipe(sharp())
           let transformedMetadata: sharp.Metadata
           if (t.withSharpMeta) {
-            untransformed.pipe(media).pipe(transform.sharp.clone()).pipe(transformed)
             transformedMetadata = await transformed.metadata()
           }
           const objectMetaFn = transform.objectMeta || t.objectMeta || defaultObjectMetaCallback
@@ -96,6 +94,7 @@ class MulterMinioSharpStorage implements multer.StorageEngine {
           return await t.minioClient
             .putObject(t.bucket, key, transformed, objectMeta)
             .then(objectInfo => {
+              transformed.destroy()
               const res: TransformedType = {
                 id: transform.id,
                 status: 'success',

@@ -50,11 +50,11 @@ const upload = multer({
     transforms: [
       {
         id: '320',
-        sharp: sharp().resize(320).jpeg()
+        sharp: (_req, _file, _t) => sharp().resize(320).jpeg()
       },
       {
         id: '640',
-        sharp: sharp().resize(640).jpeg()
+        sharp: (_req, _file, _t) => sharp().resize(640).jpeg()
       }
     ],
     clientOptions: {
